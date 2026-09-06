@@ -23,8 +23,9 @@ Do **not** put this on an unattended cron until the punch list in `NOTES.md` is 
 
 | File | What it is |
 |---|---|
-| `SKILL.md` | The operating playbook — the actual step-by-step an agent follows |
-| `AGENTS.md` | Setup + ground rules for *any* AI agent picking this up (capabilities needed, safety rules) |
+| `SETUP.md` | **Start here.** Full runbook: fresh clone → same working state, phase by phase, with a troubleshooting table |
+| `SKILL.md` | The operating playbook — the actual step-by-step an agent follows once set up |
+| `AGENTS.md` | Ground rules for *any* AI agent picking this up (capabilities needed, safety rules) |
 | `POSTING-TIMES.md` | Researched best posting windows for the GCC audience + how to schedule them |
 | `NOTES.md` | Current state, decisions already made, and the open punch list |
 | `open-main-chrome-debug.bat` | Launches the dedicated automation Chrome (Windows) |
