@@ -8,6 +8,16 @@ each post's analytics to improve the next one.
 Built for the **Bubble Mousse** brand (GCC cash-on-delivery hair care, account
 [`@bubble.mousse01`](https://www.tiktok.com/@bubble.mousse01), store bubblemousse.store).
 
+## Two skills
+
+| Skill | Role | State |
+|---|---|---|
+| **Posting** (repo root) | Compose + publish photo slideshows. Writes/publishes. | Semi-manual, working for compose; human presses Post |
+| **Tracking** (`tracking-skill/`) | Measure how posts performed, keep a Playbook, feed briefs back. **Read-only** — never posts. | Spec only, not built |
+
+They coordinate through one shared content store (a Google Sheet). Run the tracking
+skill as a separate sub-agent / cron.
+
 ## Maturity — read this first
 
 This is **semi-manual and supervised**, not a hands-off scheduler yet.
@@ -30,6 +40,7 @@ Do **not** put this on an unattended cron until the punch list in `NOTES.md` is 
 | `NOTES.md` | Current state, decisions already made, and the open punch list |
 | `open-main-chrome-debug.bat` | Launches the dedicated automation Chrome (Windows) |
 | `.env.example` | Secrets template — copy to `.env` (gitignored) |
+| `tracking-skill/` | The performance-tracking sub-agent — its own `SKILL.md`, `SETUP.md`, `NOTES.md` |
 
 ## What is deliberately NOT in here (and why it won't "just work" elsewhere)
 
