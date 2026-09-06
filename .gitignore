@@ -1,0 +1,13 @@
+# SECRETS - never commit
+.env
+
+# Live browser profile - 500MB+, contains the logged-in TikTok session cookies
+chrome-profile/
+
+# Automation scratch output
+*.png
+*.jpeg
+*.jpg
+.playwright-mcp/
+console-*.log
+page-*.yml
