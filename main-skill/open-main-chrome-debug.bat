@@ -14,5 +14,8 @@ REM should run clean - do not remove these flags.
 REM
 REM Safe to close/reopen anytime with this same .bat - the TikTok login is
 REM saved to disk once you've done it the first time.
+REM
+REM NOTE: --user-data-dir points at "chrome-profile" at the REPO ROOT (one level
+REM up from this main-skill/ folder), not inside main-skill/. It's gitignored.
 
 start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 --user-data-dir="D:\CLAUDE CODE\CONTENT DEPARTEMENT\tiktok-growth-agent\chrome-profile" --disable-extensions --disable-sync https://www.tiktok.com/tiktokstudio/upload

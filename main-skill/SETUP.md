@@ -44,7 +44,7 @@ launches its own.
 1. **Clone the repo** and enter it:
    ```
    gh repo clone <your-org>/tiktok-growth-agent
-   cd tiktok-growth-agent
+   cd tiktok-growth-agent/main-skill
    ```
 
 2. **Create `.env`** from the template and fill in real values:
@@ -57,8 +57,8 @@ launches its own.
 3. **Edit `open-main-chrome-debug.bat`** — change the hardcoded paths to your machine:
    - Chrome exe path (`C:\Program Files\Google\Chrome\Application\chrome.exe`)
    - `--user-data-dir=...` → an absolute path to a **new empty folder** named
-     `chrome-profile` inside this repo (it's gitignored). This becomes the dedicated
-     profile.
+     `chrome-profile` at the **repo root** (one level up from `main-skill/`; it's
+     gitignored). This becomes the dedicated profile.
    - Keep `--remote-debugging-port=9222`, `--disable-extensions`, `--disable-sync`
      exactly as they are. Do not remove those last two.
 

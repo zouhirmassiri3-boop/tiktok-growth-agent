@@ -4,7 +4,7 @@ A **read-only** sub-agent. It measures how posted content performed, keeps a
 Playbook of what's working, and feeds briefs back to the posting skill. It never
 uploads, never publishes, never edits a live post.
 
-Companion to the posting skill in the parent repo. They share one content store
+Companion to the main skill in `../main-skill/`. They share one content store
 (the Google Sheet). Division of labour:
 
 | Posting skill | Tracking skill (this one) |

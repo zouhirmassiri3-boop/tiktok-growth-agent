@@ -1,7 +1,7 @@
 # SETUP — tracking skill
 
-Lighter than the posting skill's setup — it reuses the same content store and (as a
-fallback) the same browser. Work through in order.
+Lighter than the main skill's setup (`../main-skill/SETUP.md`) — it reuses the same
+content store and (as a fallback) the same browser. Work through in order.
 
 ## Phase 0 — Prerequisites
 
