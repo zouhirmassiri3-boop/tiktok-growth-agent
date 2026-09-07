@@ -39,6 +39,18 @@ Flow that works:
 
 Known-cosmetic, not a blocker: hashtags typed programmatically stay plain black in the composer (no blue chip). TikTok parses `#token` from the description server-side on publish, so they still become real hashtags on the live post — but verify this on the first published post; if they're genuinely not clickable live, switch to entering them through the composer's "# Hashtags" helper button.
 
+### Editing an already-published post (recovery path)
+
+TikTok photo posts CAN be edited after publishing — caption, title/headline, hashtags,
+privacy/comment settings (NOT the photos, NOT the sound). Path (confirmed working
+2026-09-07): `https://www.tiktok.com/tiktokstudio/content` → the post's row → click the
+first Actions icon (the pencil) — flaky, click it via injected JS
+(`document.querySelectorAll('div[data-tt="components_ActionCell_Container"]')[rowIndex].click()`)
+→ lands on `/tiktokstudio/upload/post/photo?item_id=<id>` → fill the title textbox and
+the DraftJS description exactly as in a fresh compose (title via `fill`/type, description
+via `pressSequentially`) → click **Save**. It returns to the content list; re-open the
+live post to confirm. Use this if a post went out with a missing/wrong caption.
+
 ## Open items
 
 - Video files: sheet currently only has 3 image-link columns. If a video shows up instead of 3 images, stop and ask Zouhir how he wants that row shaped before inventing a column layout.
