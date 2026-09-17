@@ -19,25 +19,46 @@ Older folder `THE SECOND ING - POSTS` already has 6 unprocessed 3-slide sets sit
    - **Afternoon — Social/Relatable**: AI lifestyle scene, growth mechanic (comment/save/follow trigger), not a claim.
    - **Evening — Benefit + Before/After**: hook → proof → offer, sales-focused, CTA = "الرابط في البايو".
 4. **Host each image**: corenexis Image CDN API, `POST https://api.corenexis.com/image-cdn/v3`, `-F "image=@<local file>" -F "duration=168"`. Key lives at `D:\CLAUDE CODE\FB DEPARTEMENT\instagram-image-post\.env` (`CORENEXIS_API_KEY`) — read via `source`, never echo it. Respect the 5 requests/minute cap. Response `data.url` is the link to use; `data.expiry` is when it dies (168h from upload) — upload close to the post's actual send time, not all at once for a whole week.
-5. **Write caption + hashtags**: Gulf Arabic, voice matches Zouhir's live posts (see [[bubble_mousse_customer_support_kb]] for pricing/offer facts — never invent a price or promo). Hook line on slide 1, short body, CTA per SLOT type above, 4-7 hashtags mixing broad discovery (`#العناية_بالشعر #الشيب`) with geo (`#عمان #الامارات #السعودية`).
+5. **Write caption + hashtags**: Gulf Arabic, voice matches Zouhir's live posts (see [[bubble_mousse_customer_support_kb]] for pricing/offer facts — never invent a price or promo). 4-7 hashtags mixing broad discovery (`#العناية_بالشعر #الشيب`) with geo (`#عمان #الامارات #السعودية`).
+   **Mandatory engagement checklist (see `GROWTH-STRATEGY.md` — a post failing any of these goes back for a rewrite, not queued as-is):**
+   1. Hook baked into slide 1 that lands in under 1 second, not the caption.
+   2. A comment-bait question answerable in one word/number — not generic "شاركنا رأيك".
+   3. A real, currently-trending Khaleeji/Arabic sound noted for Zouhir to add (type, not silence/original) — check Studio's Royalty-free sounds / Discover trending each batch.
+   4. ONE primary CTA — either the comment-bait question (engagement posts) or "الرابط في البايو" (sales posts), never both stacked with equal weight.
 6. **Write the row(s)** into `Content`: `POST NUMBER`, `SLIDE 1/2/3 LINK`, `CAPTION`, `SLOT`. Leave `APPROVE (YES)` and `STATUS` blank — Zouhir approves, nothing auto-posts.
 7. **Report back**: what was added (post numbers, slots, one-line summary of each), and flag anything ambiguous (a Morning slot with no real testimonial supplied, a leftover file that doesn't divide evenly into 3, etc.) rather than guessing silently.
 
-## Publishing via the dedicated Chrome (browser automation notes, learned 2026-09-06)
+## Posts go out as VIDEO, not photo slideshows (changed 2026-09-09)
 
-Post through `playwright-tiktok` MCP tools ONLY (CDP → `http://localhost:9222`, the dedicated `chrome-profile`). Never the plain `playwright` server. Launch/relaunch with `open-main-chrome-debug.bat` — it now carries `--disable-extensions --disable-sync` (the profile got synced to Zouhir's Google account and pulled in ~22 extensions incl. a VPN; those broke automation and were an account risk — keep both flags).
+TikTok **Photo mode** does not show slides fullscreen — it fits-to-width, letterboxes, and adds a slow auto Ken-Burns zoom that crops ~8-10% toward centre and drifts content off the top/bottom. Confirmed on live Post 5 (`7683546526366321942`): the review-card slide's card was pushed out of frame. A perfectly-sized 1080×1920 image still renders wrong in Photo mode. **So each post is now assembled into a 1080×1920 MP4 and uploaded through the normal Video flow** — true fullscreen, no zoom, no bars, subject stays put.
+
+**Build step (before uploading a row):**
+```
+# 3-slide set:
+bash "…/main-skill/slides-to-mp4.sh"  OUT.mp4  s1.png s2.png s3.png
+# single all-in-one image (GPT 2:3 output): pad first, then one static clip:
+bash "…/main-skill/pad-to-vertical.sh"  IN-1024x1536.png  PADDED-1080x1920.png
+bash "…/main-skill/image-to-mp4.sh"     PADDED-1080x1920.png  OUT.mp4
+```
+Needs `ffmpeg` on PATH (winget: `…/Gyan.FFmpeg_…/ffmpeg-9.0-full_build/bin`). `slides-to-mp4` → h264 yuv420p 30fps, 2.8s/slide (~8.4s), silent AAC, `+faststart`. `pad-to-vertical` top-aligns a 2:3 creative on a 1080×1920 canvas with a blurred bottom strip (the "safe" zone under TikTok's UI). `image-to-mp4` → 6s static 1080×1920 clip. Image links go in the sheet as the record; the MP4 is built locally at post time, not stored.
+
+**Single-image posts (added 2026-09-10):** Zouhir now also drops one all-in-one image per post (baked hook + engagement question + CTA banner) instead of 3 slides. Then: SLIDE 1 LINK = the (padded) image, SLIDE 2/3 LINK blank. Caption should *complement* the baked text (context + echo the on-image comment-trigger to drive comments + geo hashtags + COD/link-in-bio), not repeat it. **Watch the composition:** if the hook/CTA sit below ~60% of the frame they'll be hidden by TikTok's caption/handle UI — flag it and ask him to move text into the top half next time.
+
+## Publishing via the dedicated Chrome (browser automation notes)
+
+Post through `playwright-tiktok` MCP tools ONLY (CDP → `http://localhost:9222`, the dedicated `chrome-profile`). Never the plain `playwright` server. Launch/relaunch with `open-main-chrome-debug.bat` (carries `--disable-extensions --disable-sync` — the profile got synced to Zouhir's Google account and pulled in ~22 extensions incl. a VPN; keep both flags). **The profile Chrome accumulates 40+ stuck `effect_c.worker` / clip-forge worker targets after a compose session and then `playwright-tiktok` times out on connect — kill it (`Get-CimInstance Win32_Process -Filter "Name='chrome.exe'" | ? CommandLine -like '*tiktok-growth-agent*' | % { Stop-Process -Id $_.ProcessId -Force }`) and relaunch before each run.**
 
 Flow that works:
-1. Navigate `https://www.tiktok.com/tiktokstudio/upload?tab=photo`. If a `beforeunload` dialog blocks navigation, accept it (`browser_handle_dialog accept:true`).
-2. The "Select photos" button and the Photos tab are click-flaky — click them via `browser_evaluate` (`[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Select photos').click()`), not `browser_click`.
-3. Right after that JS click, a file chooser opens → `browser_file_upload` with the 3 local paths. **Paths must use a lowercase `d:\` drive letter** — `D:\...` is rejected as "outside allowed roots".
-4. Caption: the description box is a **DraftJS editor**. Only one method registers text in its internal state (counter goes to N/4000 AND text renders):
-   - `browser_type` with **`slowly: true`** (→ `pressSequentially`, real per-char keystrokes) targeting `div.public-DraftEditor-content[contenteditable="true"]`, into a **freshly loaded** editor.
-   - Do NOT use: synthetic `ClipboardEvent` paste (ignored), `execCommand('insertText')` (renders but counter stays 0 — not saved), `locator.fill()` (counter updates but renders empty — corrupts state). All three were tried and fail.
-   - If the editor is already dirty/corrupted, reload the upload page (accept the beforeunload) and re-upload photos rather than trying to clear it.
-5. **Stop before publishing** (Phase 1). Do not add sound, do not click Post. Zouhir picks the sound, reviews, and hits Post himself, every time — he has stated this explicitly.
+1. Verify the previous post actually went live first: open `https://www.tiktok.com/tiktokstudio/content`, check the top row. Then navigate `https://www.tiktok.com/tiktokstudio/upload` (default **Videos** tab). Accept any `beforeunload` dialog.
+2. Trigger the file chooser via JS, not `browser_click` (buttons are actionability-flaky — `browser_click` times out on "stable"): `document.querySelector('input[type=file]').click()` in `browser_evaluate`, then immediately `browser_file_upload` with the **MP4 path** (lowercase `d:\` drive letter — `D:\…` is rejected). Video ingest takes longer than photos; wait for the editor (`/tiktokstudio/upload/post` or the description box) to appear.
+3. Caption — the description box is a **DraftJS editor** (`div.public-DraftEditor-content[contenteditable="true"]`). **Use `browser_type` WITHOUT `slowly`** (→ `locator.fill()`, atomic CDP `Input.insertText`): text + spaces + English words + emoji all land in one shot, counter goes to N/4000, one clean block. Multi-line captions with `\n` work (kept as soft breaks in one block). **On video uploads TikTok auto-fills the description with the MP4 filename after a short delay** — run the fill TWICE (the first can race the autofill and end up with `post6-video` prepended; the second replaces cleanly). Verify the first block doesn't start with the filename.
+   - **Do NOT use `slowly: true`** on the current Studio build — it silently drops every space and every Latin word ("Bubble Mousse" vanished, words mash together). It used to be the only method that worked; it no longer is.
+   - Synthetic `ClipboardEvent` paste is ignored (React). Keyboard `Ctrl+A` / `Backspace` / `Delete` do NOT reach the editor — to clear a bad attempt, reload the upload page and re-upload rather than trying to edit in place.
+   - After filling, `browser_press_key Escape` to dismiss the hashtag autocomplete dropdown before screenshotting.
+4. Verify: read back `div[data-contents="true"] > div` block text + take a screenshot.
+5. **Stop before publishing** (Phase 1). Do not add sound, do not click Post. Zouhir picks the sound, reviews, and hits Post himself, every time — he has stated this explicitly. Then `SendUserFile` the screenshot + `PushNotification` him.
 
-Known-cosmetic, not a blocker: hashtags typed programmatically stay plain black in the composer (no blue chip). TikTok parses `#token` from the description server-side on publish, so they still become real hashtags on the live post — but verify this on the first published post; if they're genuinely not clickable live, switch to entering them through the composer's "# Hashtags" helper button.
+Known-cosmetic: hashtags typed programmatically stay plain black in the composer. TikTok parses `#token` from the description server-side on publish — confirmed clickable on the live posts, so this is fine.
 
 ### Editing an already-published post (recovery path)
 
@@ -53,6 +74,6 @@ live post to confirm. Use this if a post went out with a missing/wrong caption.
 
 ## Open items
 
-- Video files: sheet currently only has 3 image-link columns. If a video shows up instead of 3 images, stop and ask Zouhir how he wants that row shaped before inventing a column layout.
+- Posts are assembled to MP4 at upload time (see "Posts go out as VIDEO" above). The sheet keeps 3 image-link columns as the record; no new column needed. If Zouhir ever drops a real pre-made video file instead of 3 slides, upload it directly and skip the build step.
 - `THE SECOND ING - POSTS` backlog — resolve with Zouhir before it's silently lost or silently reused.
 - **Geo signal:** the automation machine's IP is residential Portugal, target market is GCC. No VPN (rejected — free ones are datacenter IPs, worse). Relying on content signals (Arabic, GCC hashtags, warm-up engagement, TikTok region setting) to teach the algorithm the audience. Watch the first posts' analytics for wrong-country reach; revisit a paid residential GCC proxy only if reach skews badly.
