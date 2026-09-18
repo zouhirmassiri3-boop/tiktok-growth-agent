@@ -31,6 +31,60 @@ lighting, slight handheld imperfection, natural grain. If a batch still comes ba
 looking synthetic, regenerate with "make the lighting messier and less even" and
 "reduce skin smoothness, add visible texture" — those two notes fix it most often.
 
+## Use the real avatar reference photos — this is the biggest realism lever
+
+`D:\CLAUDE CODE\AVATARS FOR CONTENT\` has 10 real reference photos of Gulf men
+(catalogued in `SKILLS\image-analysis\references\avatars-library.md`). **For every
+slide that shows a man's face, attach the assigned file below to GPT alongside its
+text prompt** (GPT-4o/GPT-Image support image-to-image reference — upload the file,
+then paste the text prompt in the same turn). Anchoring to a real photo instead of
+letting GPT invent a face from pure text is what actually kills the synthetic look
+— it's a bigger lever than any wording tweak.
+
+**Hard rule, still applies even though some reference photos show real gray:** the
+text prompt always specifies dark black hair and beard, never gray (per the
+project's standing avatar rule) — the reference photo is for face/pose/setting
+only, the text overrides hair color every time. Don't let a gray-haired reference
+photo leak gray hair into the output.
+
+### Avatar file key
+
+| Code | File | Profile |
+|---|---|---|
+| A1 | `ChatGPT_Image_May_24,_2026,_20260911234907.jpeg` | Young (~25-30), sharp/modern, ghutra+agal+bisht |
+| A2 | `Man_gesturing_and_smiling_in_20260911234812.jpeg` | Young professional (~30), office, no gray |
+| A3 | `Man_gesturing_while_speaking_20260911234827.jpeg` | Mature (~45-50), office desk, mid-gesture |
+| A4 | `Man_in_kandura_speaking_camera_20260911234938.jpeg` | Emirati (~35-40), native-UGC car selfie |
+| A5 | `Man_presenting_product_bottle_20260911234820.jpeg` | ~35, hands presenting a product — best for close-up product/demo shots |
+| A6 | `Man_recording_video_in_SUV_20260911234941.jpeg` | Young urban (~30-35), car selfie, Dubai-style skyline |
+| A7 | `Man_speaking_to_camera_20260911234858.jpeg` | Mature (~50-55), driving, candid |
+| A8 | `Omani_man_speaking_to_camera_20260911234933.jpeg` | ~35, street/souq candid, Muscat |
+| A9 | `Replace_person_in_photo_20260911234928.jpeg` | Emirati (~45-50), car selfie |
+| A10 | `Saudi_man_speaking_to_camera_20260911234944.jpeg` | ~45-50, majlis sofa, KSA-specific |
+
+### Avatar assignment per post (rotated so no day repeats the same face twice)
+
+| Day | Morning | Afternoon | Evening | Bonus |
+|---|---|---|---|---|
+| 1 (Sep 18) | A1 | A2 | A3 | — |
+| 2 (Sep 19) | A4 | A5 | A6 | — |
+| 3 (Sep 20) | A7 | A8 | A9 | — |
+| 4 (Sep 21) | A10 | A1 | A2 | A3 |
+| 5 (Sep 22) | A4 | A5 | A6 | — |
+| 6 (Sep 23) | A7 | A8 | A9 | A10 |
+| 7 (Sep 24) | A1 | A2 | A3 | — |
+| 8 (Sep 25) | A4 | A5 | A6 | A7 |
+| 9 (Sep 26) | A8 | A9 | A10 | — |
+| 10 (Sep 27) | A1 | A2 | A3 | A4 |
+| 11 (Sep 28) | A5 | A6 | A7 | — |
+| 12 (Sep 29) | A8 | A9 | A10 | A1 |
+| 13 (Sep 30) | A2 | A3 | A4 | A5 |
+
+Where an Evening slide is pure product/ingredient close-up with no face (e.g. the
+bottle-on-counter or hand-applying shots), the assigned avatar only applies to that
+post's slide(s) that actually show a man's face (usually S3, the CTA slide) — skip
+it for pure product shots.
+
 ---
 
 ## Day 1 — Sep 18 — 3 slots
