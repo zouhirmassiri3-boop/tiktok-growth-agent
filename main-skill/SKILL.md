@@ -2,6 +2,8 @@
 
 Turns locally-generated slide images into hosted links + GCC-targeted captions/hashtags, queued into the control sheet for approval and publish. Companion to [[tiktok_growth_agent_project]].
 
+**Posting device — SETTLED 2026-10-01, do not re-open:** publish ONLY through the dedicated Chrome on Zouhir's local PC (`chrome-profile/`, port 9222, the original setup). A VPS-hosted headless version (Hostinger, 191.215.38.38) was built and tested 2026-09-30/10-01 for zero-touch "post even with the computer off" automation — **abandoned.** Root cause confirmed by a controlled A/B test: identical video+caption posted from the VPS sat at 0 views for 9+ hours while the same content reposted from the local Chrome got 90+ views in under 10 minutes. Most likely explanation is TikTok treating the VPS's datacenter IP as untrusted/suppressed, independent of login validity (the VPS session itself logged in and posted fine — the account distribution was the problem, not the mechanics). The VPS cron job and its failure-alert cloud routine have been disabled. Do not resurrect the VPS path without Zouhir explicitly asking for it again — if he does, the IP-reputation issue needs solving first (e.g. a residential proxy), not just relaunching the old script.
+
 **Goal every single time this runs:** grow @bubble.mousse01 as fast as possible AND drive sales to bubblemousse.store. Every caption/hashtag choice is judged against both, not just reach.
 
 ## Watched folder
@@ -59,6 +61,10 @@ Flow that works:
 5. **Stop before publishing** (Phase 1). Do not add sound, do not click Post. Zouhir picks the sound, reviews, and hits Post himself, every time — he has stated this explicitly. Then `SendUserFile` the screenshot + `PushNotification` him.
 
 Known-cosmetic: hashtags typed programmatically stay plain black in the composer. TikTok parses `#token` from the description server-side on publish — confirmed clickable on the live posts, so this is fine.
+
+**TikTok Studio has a "still checking your video" confirm dialog (added ~2026-09-30):** after clicking Post, if content-check hasn't finished, a modal appears — "We're still checking your video for potential issues. Do you want to continue posting before the check is complete?" with Cancel/Post now. Must click "Post now" or the publish silently stalls. Handle immediately after the Post click, before waiting for navigation.
+
+**Captions/hashtags can only be edited ONCE PER DAY per post (confirmed 2026-10-01):** this is a hard TikTok account-level limit, not a bug. Symptom: the Save button's `aria-disabled` attribute stays `"true"` no matter how long you wait, even though the new caption text verifies correctly in the DOM — because an earlier edit attempt that same day (even one that looked like it failed) already used up the day's one allowed edit. If Save won't enable after ~30s, stop — it's the daily limit, not a timing issue, and it will not clear until the next day. Don't delete+repost a post that's already gaining real views just to fix a caption; wait a day and edit then.
 
 ### Editing an already-published post (recovery path)
 
