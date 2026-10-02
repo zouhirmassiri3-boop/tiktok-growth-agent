@@ -1,5 +1,10 @@
 # SECRETS - never commit
 .env
+local-scheduler/service-account.json
+local-scheduler/node_modules/
+local-scheduler/.run-logs/
+local-scheduler/.tmp/
+local-test/
 
 # Live browser profile - 500MB+, contains the logged-in TikTok session cookies
 chrome-profile/

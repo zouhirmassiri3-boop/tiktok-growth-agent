@@ -1,0 +1,9 @@
+{
+  "name": "tiktok-local-scheduler",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "playwright": "1.63.0",
+    "googleapis": "^144.0.0"
+  }
+}
