@@ -20,8 +20,10 @@ const SCRIPTS_DIR = path.join(ROOT, 'main-skill');
 const RUN_LOGS = path.join(ROOT, 'local-scheduler', '.run-logs');
 const TMP = path.join(ROOT, 'local-scheduler', '.tmp');
 const SERVICE_ACCOUNT_KEY = path.join(ROOT, 'local-scheduler', 'service-account.json');
-const SPREADSHEET_ID = '1FdbWKltuxIcUA0K6tK_Wy4zuzah69SCHdbsVbLm_Q_g';
-const SHEET_TAB = 'Content';
+// Per-account sheet (video-only): "bubble.mousse01 - TikTok Posts"
+// Columns: A POST NUMBER | B VIDEO LINK | C CAPTION | D STATUS | E LIVE URL
+const SPREADSHEET_ID = '1_DGa3TRFOaXA_gDzf-s_9qy7SVR9B-0bDN2ZSHl26dI';
+const SHEET_TAB = 'Sheet1';
 
 for (const d of [RUN_LOGS, TMP]) fs.mkdirSync(d, { recursive: true });
 
@@ -61,22 +63,23 @@ async function getSheetsClient() {
   return google.sheets({ version: 'v4', auth: client });
 }
 
+// Video-only sheet: A POST NUMBER | B VIDEO LINK | C CAPTION | D STATUS | E LIVE URL
 async function findNextRow(sheets) {
-  const { data } = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: `${SHEET_TAB}!A2:H500` });
+  const { data } = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: `${SHEET_TAB}!A2:E500` });
   const rows = data.values || [];
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
-    const slide1 = r[2] || '';
-    const caption = r[5] || '';
-    const status = r[7] || '';
-    if (slide1 && caption && !status.trim()) {
-      return { rowNumber: i + 2, postNumber: r[1] || '', slide1, slide2: r[3] || '', slide3: r[4] || '', caption };
+    const videoLink = r[1] || '';
+    const caption = r[2] || '';
+    const status = r[3] || '';
+    if (videoLink && caption && !status.trim()) {
+      return { rowNumber: i + 2, postNumber: r[0] || '', videoLink, caption };
     }
   }
   return null;
 }
-async function writeStatus(sheets, rowNumber, text) {
-  await sheets.spreadsheets.values.update({ spreadsheetId: SPREADSHEET_ID, range: `${SHEET_TAB}!H${rowNumber}`, valueInputOption: 'USER_ENTERED', requestBody: { values: [[text]] } });
+async function writeStatus(sheets, rowNumber, statusText, liveUrl) {
+  await sheets.spreadsheets.values.update({ spreadsheetId: SPREADSHEET_ID, range: `${SHEET_TAB}!D${rowNumber}:E${rowNumber}`, valueInputOption: 'USER_ENTERED', requestBody: { values: [[statusText, liveUrl || '']] } });
 }
 async function downloadFile(url, destPath) {
   const res = await fetch(url);
@@ -84,28 +87,11 @@ async function downloadFile(url, destPath) {
   fs.writeFileSync(destPath, Buffer.from(await res.arrayBuffer()));
   return destPath;
 }
-function isVideoUrl(url) { return /\.mp4(\?|$)/i.test(url); }
 
 async function prepareVideo(row, workDir) {
   fs.mkdirSync(workDir, { recursive: true });
-  if (isVideoUrl(row.slide1)) {
-    const out = path.join(workDir, 'post.mp4');
-    await downloadFile(row.slide1, out);
-    return out;
-  }
-  if (row.slide2 && row.slide3) {
-    const s1 = path.join(workDir, 's1.png'), s2 = path.join(workDir, 's2.png'), s3 = path.join(workDir, 's3.png');
-    await Promise.all([downloadFile(row.slide1, s1), downloadFile(row.slide2, s2), downloadFile(row.slide3, s3)]);
-    const out = path.join(workDir, 'post.mp4');
-    await execFileP('bash', [path.join(SCRIPTS_DIR, 'slides-to-mp4.sh'), out, s1, s2, s3]);
-    return out;
-  }
-  const raw = path.join(workDir, 'raw.png');
-  await downloadFile(row.slide1, raw);
-  const padded = path.join(workDir, 'padded.png');
-  await execFileP('bash', [path.join(SCRIPTS_DIR, 'pad-to-vertical.sh'), raw, padded]);
   const out = path.join(workDir, 'post.mp4');
-  await execFileP('bash', [path.join(SCRIPTS_DIR, 'image-to-mp4.sh'), padded, out]);
+  await downloadFile(row.videoLink, out);
   return out;
 }
 
@@ -170,7 +156,7 @@ async function main() {
 
   try {
     const result = await postToTikTok(videoPath, row.caption);
-    await writeStatus(sheets, row.rowNumber, `POSTED (auto-local) - ${result.url || 'url-unknown'} - ${new Date().toISOString()}`);
+    await writeStatus(sheets, row.rowNumber, `POSTED (auto-local) - ${new Date().toISOString()}`, result.url || '');
     log('POSTED:', result.url);
   } catch (err) {
     log('publish failed:', err.message);
